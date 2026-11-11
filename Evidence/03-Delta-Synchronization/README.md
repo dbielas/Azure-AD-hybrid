@@ -53,3 +53,5 @@ Applied property-specific write permissions directly to the target organizationa
 
 ```cmd
 dsacls "OU=Users,OU=Synced_Objects,DC=hybrid,DC=lan" /I:S /G "hybrid.lan\svc-entrasync:WP;mS-DS-ConsistencyGuid;user"
+```
+

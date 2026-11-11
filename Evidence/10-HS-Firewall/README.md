@@ -66,7 +66,7 @@ flowchart TD
 
 ### Asymmetric Path Mitigation & Host Route Injection
 To enable communication between the on-premises virtual environment and Azure spokes without dropping packets at the stateful firewall plane:
-* **Host Routing:** The Windows host kernel requires explicit persistent routes (`route -p add`) mapping both `10.1.0.0/16` and `10.2.0.0/16` to the APIPA tunnel interface (`169.254.0.26`) to prevent packets from routing to the default gateway[cite: 1].
+* **Host Routing:** The Windows host kernel requires explicit persistent routes (`route -p add`) mapping both `10.1.0.0/16` and `10.2.0.0/16` to the APIPA tunnel interface (`169.254.0.26`) to prevent packets from routing to the default gateway.
 * **Gateway Subnet UDR:** A custom route table applied to `GatewaySubnet` forces all ingress cross-premises traffic destined for Spoke 2 (`10.2.0.0/16`) directly to the Azure Firewall (`10.3.1.4`) before reaching workload subnets.
 * **Return Path Integrity:** Spoke subnets utilize a UDR routing `10.0.2.0/24` to the Azure Firewall private IP, ensuring both ingress and egress passes traverse the stateful engine symmetrically.
 

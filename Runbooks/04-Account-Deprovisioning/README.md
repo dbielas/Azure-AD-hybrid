@@ -48,61 +48,62 @@ dsacls "OU=Disabled_Users,OU=Objects,DC=hybrid,DC=lan" /I:S /G "hybrid.lan\svc-e
 
 ## 4. Standard Operational Procedures
 
-<Sequence>
-  <Step title="Disable On-Premises Account & Revoke Kerberos/NTLM" subtitle="Execution Node: DC01">
-    Disable the AD account, clear sensitive group memberships, set an unpredictable password, and scramble Kerberos ticket keys.
+### Step 1: Disable On-Premises Account & Revoke Kerberos/NTLM
+> **Execution Node:** `DC01`
 
-    ```powershell
-    # Import Active Directory Module
-    Import-Module ActiveDirectory
+Disable the AD account, clear sensitive group memberships, set an unpredictable password, and scramble Kerberos ticket keys.
 
-    $TargetUser = "amercer"
+```powershell
+# Import Active Directory Module
+Import-Module ActiveDirectory
 
-    # 1. Disable Account & Force Random 32-Character Password
-    $RandomPassword = ConvertTo-SecureString -String ([Guid]::NewGuid().ToString() + "!Aa1") -AsPlainText -Force
-    Set-ADAccountPassword -Identity $TargetUser -NewPassword $RandomPassword
-    Disable-ADAccount -Identity $TargetUser
+$TargetUser = "amercer"
 
-    # 2. Clear Interactive Group Memberships (Preserve Domain Users)
-    $UserGroups = Get-ADPrincipalGroupMembership -Identity $TargetUser | Where-Object { $_.Name -ne "Domain Users" }
-    Remove-ADPrincipalGroupMembership -Identity $TargetUser -MemberOf $UserGroups -Confirm:$false
+# 1. Disable Account & Force Random 32-Character Password
+$RandomPassword = ConvertTo-SecureString -String ([Guid]::NewGuid().ToString() + "!Aa1") -AsPlainText -Force
+Set-ADAccountPassword -Identity $TargetUser -NewPassword $RandomPassword
+Disable-ADAccount -Identity $TargetUser
 
-    # 3. Move Account to Non-Sync or Disabled OU Container
-    Get-ADUser -Identity $TargetUser | Move-ADObject -TargetPath "OU=Disabled_Users,OU=Objects,DC=hybrid,DC=lan"
-    ```
-  </Step>
+# 2. Clear Interactive Group Memberships (Preserve Domain Users)
+$UserGroups = Get-ADPrincipalGroupMembership -Identity $TargetUser | Where-Object { $_.Name -ne "Domain Users" }
+Remove-ADPrincipalGroupMembership -Identity $TargetUser -MemberOf $UserGroups -Confirm:$false
 
-  <Step title="Force Immediate Cloud Synchronization" subtitle="Execution Node: ENTRA-SYNC01">
-    Accelerate cloud state propagation by initiating an immediate Delta Sync cycle rather than waiting for the standard 30-minute interval.
+# 3. Move Account to Non-Sync or Disabled OU Container
+Get-ADUser -Identity $TargetUser | Move-ADObject -TargetPath "OU=Disabled_Users,OU=Objects,DC=hybrid,DC=lan"
+```
 
-    ```powershell
-    # Import ADSync Module and trigger delta sync
-    Import-Module "C:\Program Files\Microsoft Azure Active Directory Connect\Module\ADSyncConfig\ADSyncConfig.psd1"
-    Start-ADSyncSyncCycle -PolicyType Delta
-    ```
-  </Step>
+### Step 2: Force Immediate Cloud Synchronization
+> **Execution Node:** `ENTRA-SYNC01`
 
-  <Step title="Revoke Cloud Sessions & Reclaim Licenses" subtitle="Execution Node: Cloud / Entra ID PowerShell">
-    Kill active OAuth refresh tokens, invalidate continuous access evaluation (CAE) tokens, and strip assigned M365 licenses.
+Accelerate cloud state propagation by initiating an immediate Delta Sync cycle rather than waiting for the standard 30-minute interval.
 
-    ```powershell
-    # Connect to Microsoft Graph
-    Connect-MgGraph -Scopes "User.ReadWrite.All", "Directory.ReadWrite.All"
+```powershell
+# Import ADSync Module and trigger delta sync
+Import-Module "C:\Program Files\Microsoft Azure Active Directory Connect\Module\ADSyncConfig\ADSyncConfig.psd1"
+Start-ADSyncSyncCycle -PolicyType Delta
+```
 
-    $CloudUser = Get-MgUser -UserId "amercer@davidbielascomcast.onmicrosoft.com"
+### Step 3: Revoke Cloud Sessions & Reclaim Licenses
+> **Execution Node:** Cloud / Entra ID PowerShell
 
-    # 1. Revoke All Active Refresh Tokens / Sign-In Sessions
-    Revoke-MgUserSignInSession -UserId $CloudUser.Id
+Kill active OAuth refresh tokens, invalidate continuous access evaluation (CAE) tokens, and strip assigned M365 licenses.
 
-    # 2. Reclaim Assigned Direct Licenses
-    $AssignedLicenses = (Get-MgUser -UserId $CloudUser.Id -Property AssignedLicenses).AssignedLicenses
-    if ($AssignedLicenses) {
-        $RemoveLicenses = $AssignedLicenses | Select-Object -ExpandProperty SkuId
-        Set-MgUserLicense -UserId $CloudUser.Id -RemoveLicenses $RemoveLicenses -AddLicenses @{}
-    }
-    ```
-  </Step>
-</Sequence>
+```powershell
+# Connect to Microsoft Graph
+Connect-MgGraph -Scopes "User.ReadWrite.All", "Directory.ReadWrite.All"
+
+$CloudUser = Get-MgUser -UserId "amercer@davidbielascomcast.onmicrosoft.com"
+
+# 1. Revoke All Active Refresh Tokens / Sign-In Sessions
+Revoke-MgUserSignInSession -UserId $CloudUser.Id
+
+# 2. Reclaim Assigned Direct Licenses
+$AssignedLicenses = (Get-MgUser -UserId $CloudUser.Id -Property AssignedLicenses).AssignedLicenses
+if ($AssignedLicenses) {
+    $RemoveLicenses = $AssignedLicenses | Select-Object -ExpandProperty SkuId
+    Set-MgUserLicense -UserId $CloudUser.Id -RemoveLicenses $RemoveLicenses -AddLicenses @{}
+}
+```
 
 ---
 
