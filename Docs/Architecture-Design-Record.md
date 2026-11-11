@@ -38,18 +38,23 @@ The organization required an end-to-end hybrid landing zone architecture connect
     [ Route-Based IPsec S2S VPN Tunnel / IKEv2 ]
          |
 [ AZURE HYBRID CLOUD FABRIC ]
-  +-- Hub-VNet (10.3.0.0/16)
-  |     +-- GatewaySubnet (10.3.0.0/24) -> Azure Virtual Network Gateway (VNG)
+  +-- Transit Spoke VNet: vm-testVNET (10.1.0.0/16)
+  |     +-- GatewaySubnet (10.1.255.0/27) -> Azure Virtual Network Gateway (VNG)
+  |     +-- Route Table (GatewaySubnet UDR): 0.0.0.0/0 & 10.2.0.0/16 -> Next Hop Azure Firewall (10.3.1.4)
+  |
+  +-- VNet Peering (Gateway Transit Enabled)
+  |
+  +-- Central Hub VNet: Hub-VNet (10.3.0.0/16)
   |     +-- AzureFirewallSubnet (10.3.1.0/24) -> Azure Firewall Standard (10.3.1.4)
   |           +-- DefaultNetworkRuleCollectionGroup (AD Sync, ICMP, Admin SSH)
   |           +-- DefaultApplicationRuleCollectionGroup (L7 SNI / FQDN Whitelisting)
   |
-  +-- VNet Peering (Gateway Transit & Remote Gateway Enabled)
+  +-- VNet Peering (Remote Gateway Enabled)
   |
-  +-- Spoke 2 VNet: Spoke2-VNet (10.2.0.0/16)
+  +-- Spoke 2 Workload VNet: Spoke2-VNet (10.2.0.0/16)
         +-- Workload-Subnet (10.2.0.0/24)
               +-- vm-test (Linux / Private Workload: 10.2.0.4)
-              +-- Route Table (UDR): 0.0.0.0/0 -> Next Hop Virtual Appliance (10.3.1.4)
+              +-- Route Table (Spoke UDR): 0.0.0.0/0 & 10.0.2.0/24 -> Next Hop Azure Firewall (10.3.1.4)
               +-- Azure Policy Guardrail: Deny attachment of Public IPs
               +-- Recovery Services Vault: App-consistent snapshots & iSCSI recovery
 ```

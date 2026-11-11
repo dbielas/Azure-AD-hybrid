@@ -1,9 +1,9 @@
 # Network Architecture, Egress Matrix & Protocol Hardening
 
 ## 1. Overview & Hybrid Topology
-The hybrid network infrastructure connects an on-premises Tier-0 management plane to Microsoft Azure via an encrypted route-based IPsec Site-to-Site VPN. 
+The hybrid network infrastructure connects an on-premises Tier-0 management plane to Microsoft Azure via an encrypted route-based IPsec Site-to-Site VPN terminating in a Transit Spoke VNet (`vm-testVNET`, `10.1.0.0/16`). 
 
-All cross-boundary traffic is forced through a centralized Next-Generation Firewall (Azure Firewall Standard) deployed in the Hub VNet (`10.3.0.0/16`). Spoke workloads operate in dedicated subnets without public IP addresses, enforcing complete Layer-4 and Layer-7 inspection.
+All cross-boundary traffic between on-premises and spoke workloads is forced through a centralized Next-Generation Firewall (Azure Firewall Standard) deployed in the dedicated Hub VNet (`10.3.0.0/16`) via User-Defined Routes (UDRs). Spoke workloads operate in dedicated subnets without public IP addresses, enforcing complete Layer-4 and Layer-7 inspection.
 
 ### Subnet & IP Allocation Map
 | Hostname / Subnet | Network / IP | Component Role | Routing & Security Baseline |
@@ -11,9 +11,9 @@ All cross-boundary traffic is forced through a centralized Next-Generation Firew
 | **`DC01`** | `10.0.2.4/24` | Primary Domain Controller & DNS | Hyper-V/VirtualBox on-premises Tier-0 node. Bound to RRAS tunnel. |
 | **`ENTRA-SYNC01`** | `10.0.2.5/24` | Dedicated Entra Connect Sync Engine | Isolated member server; outbound TLS 1.2+ to Entra ID endpoints. |
 | **`Azure-S2S-VPN`** | `169.254.0.26` | Point-to-Point Tunnel Interface | Route-based IPsec Virtual Tunnel Interface (VTI). |
-| **`GatewaySubnet`** | `10.3.0.0/24` | Azure Virtual Network Gateway (VNG) | Custom UDR: `10.2.0.0/16` -> `10.3.1.4` (Azure Firewall). |
-| **`AzureFirewallSubnet`** | `10.3.1.0/24` | Azure Firewall Standard (`10.3.1.4`) | Centralized stateful packet inspection & L7 SNI proxy. |
-| **`Spoke2-Workload`** | `10.2.0.0/24` | Spoke Workload Subnet (`vm-test`: `10.2.0.4`) | Custom UDR: `0.0.0.0/0` and `10.0.2.0/24` -> `10.3.1.4`. |
+| **`GatewaySubnet`** | `10.1.255.0/27` | Azure Virtual Network Gateway (Transit Spoke `10.1.0.0/16`) | Custom UDR: `0.0.0.0/0` and `10.2.0.0/16` -> `10.3.1.4` (Azure Firewall). |
+| **`AzureFirewallSubnet`** | `10.3.1.0/24` | Azure Firewall Standard (`10.3.1.4` in Hub `10.3.0.0/16`) | Centralized stateful packet inspection & L7 SNI proxy. |
+| **`Spoke2-Workload`** | `10.2.0.0/24` | Spoke Workload Subnet (`vm-test`: `10.2.0.4` in `10.2.0.0/16`) | Custom UDR: `0.0.0.0/0` and `10.0.2.0/24` -> `10.3.1.4`. |
 
 ---
 
@@ -49,7 +49,7 @@ Both `DC01` and `ENTRA-SYNC01` are hardened in compliance with the CIS Benchmark
 ```powershell
 # Disable Insecure Protocols (SSL 2.0, SSL 3.0, TLS 1.0, TLS 1.1)
 $InsecureProtocols = @("SSL 2.0", "SSL 3.0", "TLS 1.0", "TLS 1.1")
-foreach ($Proto in$InsecureProtocols) {
+foreach ($Proto in $InsecureProtocols) {
     New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$Proto\Server" -Force | Out-Null
     New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$Proto\Server" -Name "Enabled" -Value 0 -PropertyType DWord -Force | Out-Null
     New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$Proto\Server" -Name "DisabledByDefault" -Value 1 -PropertyType DWord -Force | Out-Null
@@ -57,7 +57,7 @@ foreach ($Proto in$InsecureProtocols) {
 
 # Explicitly Enable TLS 1.2 & TLS 1.3
 $SecureProtocols = @("TLS 1.2", "TLS 1.3")
-foreach ($Proto in$SecureProtocols) {
+foreach ($Proto in $SecureProtocols) {
     New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$Proto\Client" -Force | Out-Null
     New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$Proto\Client" -Name "Enabled" -Value 1 -PropertyType DWord -Force | Out-Null
     New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\$Proto\Client" -Name "DisabledByDefault" -Value 0 -PropertyType DWord -Force | Out-Null
@@ -68,7 +68,7 @@ $NetKeys = @(
     "HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319",
     "HKLM:\SOFTWARE\Wow6432Node\Microsoft\.NETFramework\v4.0.30319"
 )
-foreach ($Key in$NetKeys) {
+foreach ($Key in $NetKeys) {
     New-ItemProperty -Path $Key -Name "SchUseStrongCrypto" -Value 1 -PropertyType DWord -Force | Out-Null
     New-ItemProperty -Path $Key -Name "SystemDefaultTlsVersions" -Value 1 -PropertyType DWord -Force | Out-Null
 }
