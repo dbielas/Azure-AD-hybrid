@@ -41,7 +41,7 @@ The Entra Connect custom service account (`hybrid.lan\svc-entrasync`) requires e
 ### ACL Verification & Remediation Command
 Run this command on `DC01` if service account permissions fail during offboarding updates:
 ```cmd
-dsacls "OU=Disabled_Users,OU=Objects,DC=hybrid,DC=lan" /I:S /G "hybrid.lan\svc-entrasync:RPWP;userAccountControl;user" "hybrid.lan\svc-entrasync:WP;mS-DS-ConsistencyGuid;user"
+dsacls "OU=Disabled_Users,OU=Synced_Objects,DC=hybrid,DC=lan" /I:S /G "hybrid.lan\svc-entrasync:RPWP;userAccountControl;user" "hybrid.lan\svc-entrasync:WP;mS-DS-ConsistencyGuid;user"
 ```
 
 ---
@@ -69,7 +69,7 @@ $UserGroups = Get-ADPrincipalGroupMembership -Identity $TargetUser | Where-Objec
 Remove-ADPrincipalGroupMembership -Identity $TargetUser -MemberOf $UserGroups -Confirm:$false
 
 # 3. Move Account to Non-Sync or Disabled OU Container
-Get-ADUser -Identity $TargetUser | Move-ADObject -TargetPath "OU=Disabled_Users,OU=Objects,DC=hybrid,DC=lan"
+Get-ADUser -Identity $TargetUser | Move-ADObject -TargetPath "OU=Disabled_Users,OU=Synced_Objects,DC=hybrid,DC=lan"
 ```
 
 ### Step 2: Force Immediate Cloud Synchronization

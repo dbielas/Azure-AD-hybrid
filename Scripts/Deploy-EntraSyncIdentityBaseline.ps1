@@ -1,10 +1,10 @@
-<#
+﻿<#
 .SYNOPSIS
     Master Tier-0 Identity Baseline Provisioning for Entra Connect Sync.
 .DESCRIPTION
     1. Builds organizational unit structures (Synced_Objects/Shared_Resources/Service_Accounts).
     2. Provisions 'svc-entrasync' with a 32-character complex password.
-    3. Hardens the account (LogonWorkstations restrictions + Protected Users group).
+    3. Hardens the account (LogonWorkstations restrictions; excluded from Protected Users to preserve DRS/delegation).
     4. Exports encrypted credentials to CLIXML for installation staging.
     5. Imports AdSyncConfig and stamps least-privilege ACLs (Read, PHS, SSPR Writeback).
 .NOTES

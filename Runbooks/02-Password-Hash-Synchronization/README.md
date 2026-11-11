@@ -59,8 +59,8 @@ Run these commands in an elevated PowerShell session on `ENTRA-SYNC01`:
 # Import ADSync Configuration Module
 Import-Module "C:\Program Files\Microsoft Azure Active Directory Connect\Module\ADSyncConfig\ADSyncConfig.psd1"
 
-# Verify PHS Global and Connector Status
-Get-ADSyncAADPasswordResetConfiguration
+# Verify PHS Global and Connector Status via Diagnostics
+Invoke-ADSyncDiagnostics -PasswordHashSynchronization
 
 # Trigger an immediate full Password Hash Sync cycle for all users
 $adConnector = (Get-ADSyncConnector | Where-Object {$_.Type -eq "AD"}).Name
