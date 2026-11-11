@@ -21,7 +21,7 @@ The synchronization engine uses a dedicated service account (`svc-entrasync`) wi
 | **`Write Property: mS-DS-ConsistencyGuid`** | `OU=Users,OU=Synced_Objects` | Sets the immutable source anchor binding on-premises AD objects to Entra ID objects. |
 | **`Reset Password` / `Write pwdLastSet`** | `OU=Users,OU=Synced_Objects` | Enables cloud-initiated SSPR password writeback to local Active Directory. |
 
-### ACL Provisioning Script (`Deploy-EntraSyncIdentityBaseline.ps1`)
+### ACL Provisioning Script ([Deploy-EntraSyncIdentityBaseline.ps1](../Scripts/Deploy-EntraSyncIdentityBaseline.ps1))
 ```cmd
 :: Delegate Source Anchor (ConsistencyGUID) Permissions to sync service account
 dsacls "OU=Users,OU=Synced_Objects,DC=hybrid,DC=lan" /I:S /G "hybrid.lan\svc-entrasync:WP;mS-DS-ConsistencyGuid;user"

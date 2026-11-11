@@ -45,7 +45,7 @@ Enforced at the Azure Firewall using Server Name Indication (SNI) inspection to 
 
 Both `DC01` and `ENTRA-SYNC01` are hardened in compliance with the CIS Benchmark for Windows Server, disabling legacy cryptographic protocols and enforcing TLS 1.2+ for all Microsoft Authentication Library (MSAL) operations.
 
-### Schannel Cryptographic Baseline (`Deploy-TransportHardening.ps1`)
+### Schannel Cryptographic Baseline ([Deploy-Transport-Hardening.ps1](../Scripts/Deploy-Transport-Hardening.ps1))
 ```powershell
 # Disable Insecure Protocols (SSL 2.0, SSL 3.0, TLS 1.0, TLS 1.1)
 $InsecureProtocols = @("SSL 2.0", "SSL 3.0", "TLS 1.0", "TLS 1.1")

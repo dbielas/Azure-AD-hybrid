@@ -18,7 +18,7 @@ This directory contains evidence validating the enforcement of Zero Trust princi
 
 | Step | Phase | Evidence File / Artifact | Key Findings |
 |---|---|---|---|
-| **1. Request Initiation** | PIM Portal | [acitvate-request](./pim-activate-request.jpg) | User requested activation linking mock ticket `CHG-9942` with justification. |
+| **1. Request Initiation** | PIM Portal | [activate-request](./pim-activate-request.jpg) | User requested activation linking mock ticket `CHG-9942` with justification. |
 | **2. Manual Approval** | PIM Portal | [request-approval](./pim-approval-request.jpg) | Global Admin evaluated and approved the request for the specified ticket execution. |
 | **3. Time-Bound Execution** | PIM Portal | [active-assignment](./pim-active-timebound.jpg) | Access granted with a hard cryptographic expiration timestamp exactly two hours from activation. |
 | **4. Automated Revocation** | Entra Audit Logs | [pim-auto-revoke](./pim-auto-revoke.jpg) | System automatically stripped group membership precisely at the two-hour expiration mark. |
