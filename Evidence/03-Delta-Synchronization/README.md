@@ -6,7 +6,7 @@ This directory contains end-to-end evidence validating standard Delta Synchroniz
 ---
 
 ## 1. Test Metadata
-* **Target Account:** `amercer@davidbielascomcast.onmicrosoft.com`
+* **Target Account:** `amercer` / `amercer@hybrid.lan` (`Alex Mercer`) $\rightarrow$ `amercer@davidbielascomcast.onmicrosoft.com`
 * **Service Principal:** `ConnectSyncProvisioning_ENTRA-SYNC01_e72762af8e46`
 * **Sync Server:** `ENTRA-SYNC01`
 * **Domain Controller:** `DC01`
@@ -18,7 +18,7 @@ This directory contains end-to-end evidence validating standard Delta Synchroniz
 
 | Step | Source System | Evidence File / Artifact | Key Findings |
 |---|---|---|---|
-| **1. Source Update** | `DC01` | [dc01-attribute-update](./dc01-attribute-update.txt) | Executed `Set-ADUser`; updated `Title` and `Department` attributes |
+| **1. Source Update** | `DC01` | [dc01-attribute-update.ps1](./dc01-attribute-update.ps1) / [output](./dc01-attribute-update.txt) | Executed `Set-ADUser`; updated `Title` and `Department` attributes |
 | **2. Delta Engine Trigger** | `ENTRA-SYNC01` | [delta-sync-trigger](./delta-sync-trigger.jpg) | Triggered `Start-ADSyncSyncCycle -PolicyType Delta`; result: `Success` |
 | **3. Delta Export Verification** | `ENTRA-SYNC01` | **[Delta-Sync-Attribute-Export](./Delta-Sync-Attribute-Export.jpg)** | **Captured `Connector Space Object Properties` during a Delta Export operation. Confirmed targeted attribute updates (`department`: `IT` $\rightarrow$ `Cybersecurity`, `title`: `Systems Administrator` $\rightarrow$ `Intelligence Analyst`) staged and pushed via verified `mS-DS-ConsistencyGuid` anchor.** |
 | **4. Cloud Reflection** | Entra ID Portal | [entra-audit-delta-update](./entra-audit-delta-update.jpg) | Status: `Success` (`Update user`) initiated by `ConnectSyncProvisioning_ENTRA-SYNC01_*` |
@@ -54,4 +54,14 @@ Applied property-specific write permissions directly to the target organizationa
 ```cmd
 dsacls "OU=Users,OU=Synced_Objects,DC=hybrid,DC=lan" /I:S /G "hybrid.lan\svc-entrasync:WP;mS-DS-ConsistencyGuid;user"
 ```
+
+---
+
+## 5. Artifacts
+
+* 📄 **PowerShell Update Script:** [`dc01-attribute-update.ps1`](./dc01-attribute-update.ps1)
+* 📄 **Active Directory Output:** [`dc01-attribute-update.txt`](./dc01-attribute-update.txt)
+* 🖼️ **Delta Sync Trigger:** [`delta-sync-trigger.jpg`](./delta-sync-trigger.jpg)
+* 🖼️ **Connector Space Object Properties:** [`Delta-Sync-Attribute-Export.jpg`](./Delta-Sync-Attribute-Export.jpg)
+* 🖼️ **Entra Audit Log Confirmation:** [`entra-audit-delta-update.jpg`](./entra-audit-delta-update.jpg)
 
