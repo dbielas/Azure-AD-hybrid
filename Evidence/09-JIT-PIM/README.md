@@ -20,7 +20,7 @@ This directory contains evidence validating the enforcement of Zero Trust princi
 |---|---|---|---|
 | **1. Request Initiation** | PIM Portal | [activate-request](./pim-activate-request.jpg) | User requested activation linking mock ticket `CHG-9942` with justification. |
 | **2. Manual Approval** | PIM Portal | [request-approval](./pim-approval-request.jpg) | Global Admin evaluated and approved the request for the specified ticket execution. |
-| **3. Time-Bound Execution** | PIM Portal | [active-assignment](./pim-active-timebound.jpg) | Access granted with a hard cryptographic expiration timestamp exactly two hours from activation. |
+| **3. Time-Bound Execution** | PIM Portal | [active-assignment](./pim-active-timebound.jpg) | Access granted with a hard time-bound expiration timestamp exactly two hours from activation. |
 | **4. Automated Revocation** | Entra Audit Logs | [pim-auto-revoke](./pim-auto-revoke.jpg) | System automatically stripped group membership precisely at the two-hour expiration mark. |
 
 ---
@@ -41,11 +41,14 @@ Rather than managing distinct PIM eligibilities for the Entra ID Directory Role 
 
 ### Visual Evidence
 
-#### 1. JIT Request & Approval Workflow
+#### 1. JIT Activation Request
+![Activate Request](./pim-activate-request.jpg)
+
+#### 2. Manual Approval Workflow
 ![Request Approval](./pim-approval-request.jpg)
 
-#### 2. Time-Bound Active Assignment
+#### 3. Time-Bound Active Assignment
 ![Active Assignment](./pim-active-timebound.jpg)
 
-#### 3. Automated Zero Trust Revocation
+#### 4. Automated Zero Trust Revocation
 ![Automated Revocation](./pim-auto-revoke.jpg)
