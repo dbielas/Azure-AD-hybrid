@@ -34,7 +34,7 @@ Dependent Service Status
   Extension Service (extensionservice)  : running
   GC Service (gcarcservice)             : running
   SMS Agent Host (CcmExec)              : unknown
-Portal Page                             : https://portal.azure.com/#@2fc99342-e81e-4f70-9a4d-ad5dc6ac38b6/resource/subscriptions/<subscription-id>/resourceGroups/rg-hybrid-arc/providers/Microsoft.HybridCompute/machines/DC01/overview
+Portal Page                             : https://portal.azure.com/#@<tenant-id>/resource/subscriptions/<subscription-id>/resourceGroups/rg-hybrid-arc/providers/Microsoft.HybridCompute/machines/DC01/overview
 Disabled Features                       : 
 Agent Auto Upgrade Task Status          : enabled, id: {E8B2AE8B-0F04-4D44-A090-D82D72158E82}
 
@@ -74,7 +74,7 @@ Dependent Service Status
   Extension Service (extensionservice)  : running
   GC Service (gcarcservice)             : running
   SMS Agent Host (CcmExec)              : unknown
-Portal Page                             : https://portal.azure.com/#@2fc99342-e81e-4f70-9a4d-ad5dc6ac38b6/resource/subscriptions/<subscription-id>/resourceGroups/rg-hybrid-arc/providers/Microsoft.HybridCompute/machines/ENTRA-SYNC01/overview
+Portal Page                             : https://portal.azure.com/#@<tenant-id>/resource/subscriptions/<subscription-id>/resourceGroups/rg-hybrid-arc/providers/Microsoft.HybridCompute/machines/ENTRA-SYNC01/overview
 Disabled Features                       : 
 Agent Auto Upgrade Task Status          : enabled, id: {F34B9DCF-3357-4128-8662-0391F26EFA48}
 
