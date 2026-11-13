@@ -9,7 +9,7 @@ This directory contains end-to-end evidence validating the onboarding, telemetry
 * **Primary Infrastructure Node:** `DC01` (10.0.2.4) — Primary Domain Controller
 * **Sync Infrastructure Node:** `ENTRA-SYNC01` (10.0.2.5) — Entra Connect Sync Engine
 * **Target Workspace:** `law-hybrid-logs`
-* **Resource Group:** `rg-hybrid-arc`
+* **Resource Group:** `rg-hybrid-arc` (`westus2`)
 * **Data Collection Rule:** `dcr-windows-event-logs`
 * **Onboarding Method:** Service Principal (`sp-arc-onboarding`)
 * **Control Agent:** Azure Connected Machine Agent (`azcmagent` v1.66.03466.3076)
@@ -22,7 +22,7 @@ This directory contains end-to-end evidence validating the onboarding, telemetry
 | Step | Source System | Evidence File / Artifact | Key Findings |
 |---|---|---|---|
 | **01. Local Arc Agent Status** | `DC01, ENTRA-SYNC01` | [azcmagent-status-show](./azcmagent-status-show.txt) | Executed `azcmagent.exe show`; confirmed `Agent Status: Connected` and core services (`himds`, `ExtensionService`) running. |
-| **02. Extension Pipeline Check** | `DC01, ENTRA-SYNC01` | [azcmagent-extension-list](./azcmagent-extension-list.txt) | Executed `azcmagent.exe extension list`; verified `AzureMonitorWindowsAgent` extension in `Succeeded` provisioning state. |
+| **02. Extension Pipeline Check** | `DC01, ENTRA-SYNC01` | [azcmagent-extension-list](./azcmagent-extension-list.txt) | Executed `azcmagent.exe` extension check; verified `AzureMonitorWindowsAgent` extension in `State: ENABLED`. |
 | **03. Connected Machines Verification** | Azure | [arc-connected-machines](./arc-connected-machines.txt) | Executed `az connectedmachine list` query; confirmed both `DC01` and `ENTRA-SYNC01` connected to Azure. |
 | **04. Heartbeat Ingestion Verification** | Log Analytics | [kql-heartbeat-telemetry](./kql-heartbeat-telemetry.csv) | Executed `Heartbeat` KQL query; confirmed lockstep health signals and Arizona MST timestamps across `DC01` and `ENTRA-SYNC01`. |
 
@@ -56,7 +56,7 @@ Heartbeat
 ## 4. Operational Considerations & Hypervisor Recovery Runbook
 
 ### Hypervisor Pause/Resume Edge Case
-When virtual machines undergo hypervisor state shifts (e.g., Hyper-V pause/resume or snapshot restore), socket invalidation and stale DNS caching (`lookup gbl.his.arc.azure.com: no such host`) can prevent `MonAgentCore.exe` from completing TLS handshakes to Azure, even while `azcmagent` reports `Connected`.
+When virtual machines undergo hypervisor state shifts (e.g., VirtualBox/Hyper-V pause/resume or snapshot restore), socket invalidation and stale DNS caching (`lookup gbl.his.arc.azure.com: no such host`) can prevent `MonAgentCore.exe` from completing TLS handshakes to Azure, even while `azcmagent` reports `Connected`.
 
 ### Remediation Protocol
 If `Heartbeat` or `Event` telemetry halts following host power state changes, execute the following recovery sequence on the affected node:
