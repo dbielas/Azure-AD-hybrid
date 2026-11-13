@@ -33,7 +33,7 @@ This directory contains end-to-end evidence validating on-premises account disab
 In Active Directory, disabling an account modifies the `userAccountControl` bitmask property:
 * **Standard User Baseline:** Typically `512` (`NORMAL_ACCOUNT`), updating to `514` (`NORMAL_ACCOUNT` + `ACCOUNTDISABLE`).
 * **Lab Environment (`66050`):** Because the account was provisioned with `PasswordNeverExpires: True`, the active bitmask was `66048` (`0x10200`). Disabling the account set bit `0x0002` (`ACCOUNTDISABLE`), yielding `66050`:
-  $$\text{DONT\_EXPIRE\_PASSWORD}\ (65536) + \text{NORMAL\_ACCOUNT}\ (512) + \text{ACCOUNTDISABLE}\ (2) = \mathbf{66050}$$
+  > `DONT_EXPIRE_PASSWORD` (65536) + `NORMAL_ACCOUNT` (512) + `ACCOUNTDISABLE` (2) = **66050**
 
 ### Sync Engine Transformation Logic
 During the Delta Synchronization cycle, Entra Connect evaluates the bitwise flag via outbound sync rules:
