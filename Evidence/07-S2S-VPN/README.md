@@ -3,6 +3,8 @@
 ## Executive Summary
 This directory contains end-to-end architectural and operational validation of a route-based IPsec Site-to-Site (S2S) VPN tunnel connecting an on-premises Active Directory environment (`hybrid.lan`) to an Azure Virtual Network (`10.1.0.0/16`). It demonstrates secure cross-boundary Layer 3 routing, stateful directory service port reachability, hybrid name resolution, Linux domain integration, and Windows Hybrid Entra Join synchronization.
 
+> **Architecture Progression Note:** This module captures the initial S2S VPN transit baseline with `vm-test` residing in `vm-testVNET` (`10.1.1.4`). In [Module 10](../10-HS-Firewall/), this topology is expanded into a 3-VNet Hub-and-Spoke architecture with centralized Azure Firewall inspection and `vm-test` segmented into `Spoke2-VNet` (`10.2.0.4`).
+
 ---
 
 ## 1. Architecture & IPAM Topology
@@ -43,7 +45,7 @@ graph TD
 | Step | Source System | Evidence File / Artifact | Key Findings |
 |---|---|---|---|
 | **01. S2S Tunnel State** | Azure Portal / VNG | [vpn-gateway-status](./vpn-gateway-status.jpg) | Confirmed active S2S connection status (`Connected`) with bidirectional telemetry across the gateway plane. |
-| **02. Layer 3 Routing** | `DC01` | [tracert-to-azure-vm](./tracert-to-azure-vm.txt) | Executed `tracert 10.1.1.4`; verified packet egress over the S2S interface to the Azure workload subnet without routing loops. |
+| **02. Layer 3 Routing** | `DC01` | [tracert-to-azure-vm](./tracert-to-azure-vm.txt) | Executed `Get-NetRoute` on `DC01`; verified `10.1.0.0/16` route bound to interface `Azure-S2S-VPN` (`RouteMetric: 10`). |
 | **03. Private Remote Access** | Workstation / VPN | [ssh-session-vm-test](./ssh-session-vm-test.jpg) | Established direct interactive SSH management session to `vm-test` (`10.1.1.4`) over the private encrypted tunnel. |
 | **04. Cross-Premises DNS** | `vm-test` (`10.1.1.4`) | [dig-hybrid-lan](./dig-hybrid-lan.jpg) | Executed `dig @10.0.2.4 hybrid.lan +short`; confirmed cloud-to-on-premises DNS resolution of the local domain. |
 | **05. AD Port Validation** | `vm-test` (`10.1.1.4`) | [nc-ad-ports-check](./nc-ad-ports-check.jpg) | Executed `nc -zv 10.0.2.4 389` (LDAP) and `88` (Kerberos); verified network paths and security list rules allow core directory traffic. |
